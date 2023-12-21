@@ -35,6 +35,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/api/v1/user/delete-task", async (req, res) => {
+      const taskId = req.params.id;
+      const query = {_id: new ObjectId(taskId)};
+      const result = await taskCollection.deleteOne(query);
+      res.send(result);
+
+    });
   } finally {
     // await client.close();
   }

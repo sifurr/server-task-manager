@@ -24,24 +24,34 @@ async function run() {
     const taskCollection = database.collection("tasks");
 
     // end points for tasks
+    app.get("/api/v1/user/tasks", async (req, res) => {
+      const result = await taskCollection.find().toArray();
+      res.send(result);
+    });
+
     app.post("/api/v1/user/create-task", async (req, res) => {
       const newTask = req.body;
       const result = await taskCollection.insertOne(newTask);
       res.send(result);
     });
 
-    app.get("/api/v1/user/tasks", async (req, res) => {
-      const result = await taskCollection.find().toArray();
+    
+    app.put("/api/v1/user/update-task/:id", async (req, res) => {
+      const taskId = req.params.id;
+      const updatedTask = req.body;
+      const { _id, ...taskToUpdate } = updatedTask;
+      const filter = { _id: new ObjectId(taskId) };
+      const result = await taskCollection.updateOne(filter, { $set: taskToUpdate });
       res.send(result);
     });
 
-    app.delete("/api/v1/user/delete-task", async (req, res) => {
+    app.delete("/api/v1/user/delete-task/:id", async (req, res) => {
       const taskId = req.params.id;
-      const query = {_id: new ObjectId(taskId)};
+      const query = { _id: new ObjectId(taskId) };
       const result = await taskCollection.deleteOne(query);
       res.send(result);
-
     });
+    
   } finally {
     // await client.close();
   }

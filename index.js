@@ -35,7 +35,7 @@ const verifyToken = (req, res, next) => {
       return res.status(401).send({ message: "401, You're not authorized" });
     }
     req.decoded = decoded;
-    
+
     next();
   });
 };
@@ -66,7 +66,7 @@ async function run() {
         .cookie("token", token, {
           // secure: process.env.NODE_ENV === "production",
           // sameSite: "None",
-          
+
           httpOnly: true,
           secure: false,
         })
@@ -74,6 +74,21 @@ async function run() {
     });
 
     // user related endpoints
+    app.get("/api/v1/users", verifyToken, async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/api/v1/user", verifyToken, async (req, res) => {
+      const queryEmail = req.query.email;
+      if (queryEmail !== req.decoded.email) {
+        return res.status(403).send({ message: "Forbidden" });
+      }
+      const query = { email: queryEmail };
+      const user = await userCollection.findOne(query);
+      res.send({ user });
+    });
+
     app.post("/api/v1/users", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
